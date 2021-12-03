@@ -1,4 +1,4 @@
-module godotkicker
+module kickerbot
 
 go 1.17
 

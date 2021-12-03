@@ -1,4 +1,4 @@
-package bot
+package kicker
 
 import (
 	tb "gopkg.in/tucnak/telebot.v3"

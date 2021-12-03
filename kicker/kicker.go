@@ -1,4 +1,4 @@
-package bot
+package kicker
 
 import (
 	"errors"
@@ -13,12 +13,14 @@ type Handler struct {
 	Handler  tb.HandlerFunc
 }
 
-type Bot struct {
+/// Базовая структура для бота
+type Kicker struct {
 	Bot   *tb.Bot
 	Token string
 }
 
-func (b *Bot) Init() error {
+/// Initialize bot with token
+func (b *Kicker) Init() error {
 	bot, err := tb.NewBot(tb.Settings{
 		Token:  b.Token,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
@@ -32,7 +34,7 @@ func (b *Bot) Init() error {
 }
 
 // Add handler methods to the bot
-func (b *Bot) AddHandlers(handlers []Handler) error {
+func (b *Kicker) AddHandlers(handlers []Handler) error {
 	if len(handlers) != 0 {
 		for i := range handlers {
 			b.Bot.Handle(handlers[i].Endpoint, handlers[i].Handler)
