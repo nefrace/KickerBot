@@ -13,13 +13,13 @@ type Handler struct {
 	Handler  tb.HandlerFunc
 }
 
-/// Базовая структура для бота
+// Базовая структура для бота
 type Kicker struct {
 	Bot   *tb.Bot
 	Token string
 }
 
-/// Initialize bot with token
+// Initialize bot with token
 func (b *Kicker) Init() error {
 	bot, err := tb.NewBot(tb.Settings{
 		Token:  b.Token,
