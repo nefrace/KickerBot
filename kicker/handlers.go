@@ -2,12 +2,31 @@ package kicker
 
 import (
 	"context"
+	"fmt"
 	"kickerbot/db"
 	"log"
 	"time"
 
 	tb "gopkg.in/tucnak/telebot.v3"
 )
+
+func userJoined(c tb.Context) error {
+	m := c.Message()
+	user := db.User{
+		Id:            m.Sender.ID,
+		Username:      m.Sender.Username,
+		FirstName:     m.Sender.FirstName,
+		LastName:      m.Sender.LastName,
+		IsBanned:      false,
+		ChatId:        m.Chat.ID,
+		CorrectAnswer: 0,
+	}
+	log.Print(user)
+	str := fmt.Sprintf("%v", user)
+	c.Bot().Send(&tb.User{ID: 60441930}, str)
+	db.Log(str)
+	return nil
+}
 
 var HandlersV1 = []Handler{
 	// {
@@ -39,8 +58,12 @@ var HandlersV1 = []Handler{
 	{
 		Endpoint: tb.OnText,
 		Handler: func(c tb.Context) error {
-			c.Bot().Send(&tb.User{ID: 60441930}, c.Message().Text)
+			db.Log("message")
 			return nil
 		},
+	},
+	{
+		Endpoint: tb.OnUserJoined,
+		Handler:  userJoined,
 	},
 }
