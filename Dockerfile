@@ -3,5 +3,6 @@ WORKDIR /src
 COPY . . 
 RUN go build -o /out/kicker
 
-FROM scratch AS bin 
+FROM alpine:3.14 AS bin 
 COPY --from=build /out/kicker /
+CMD "/kicker"

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -39,18 +40,20 @@ func Init(URI string) (DB, error) {
 		Database: db,
 		Client:   client,
 	}
-	Log("startup")
+	Log("startup", nil)
 	return database, nil
 }
 
-func Log(event string) {
+func Log(event string, what interface{}) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	t := time.Now()
-	log.Printf("%v :: EVENT: %s", t, event)
+	content := fmt.Sprintf("%v", what)
+	log.Printf("%v :: EVENT: %s\n%v", t, event, what)
 	_, err := database.Database.Collection("logs").InsertOne(ctx, bson.D{
 		primitive.E{Key: "time", Value: t},
 		primitive.E{Key: "event", Value: event},
+		primitive.E{Key: "what", Value: content},
 	})
 	if err != nil {
 		log.Print(err)

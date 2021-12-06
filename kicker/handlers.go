@@ -24,7 +24,7 @@ func userJoined(c tb.Context) error {
 	log.Print(user)
 	str := fmt.Sprintf("%v", user)
 	c.Bot().Send(&tb.User{ID: 60441930}, str)
-	db.Log(str)
+	db.Log("new user", str)
 	return nil
 }
 
@@ -37,6 +37,13 @@ var HandlersV1 = []Handler{
 	// 		return nil
 	// 	},
 	// },
+	{
+		Endpoint: tb.OnText,
+		Handler: func(c tb.Context) error {
+			db.Log("message", c.Message())
+			return nil
+		},
+	},
 	{
 		Endpoint: tb.OnAddedToGroup,
 		Handler: func(c tb.Context) error {
@@ -52,16 +59,11 @@ var HandlersV1 = []Handler{
 			if err != nil {
 				log.Print(err)
 			}
+			db.Log("new chat", chat)
 			return nil
 		},
 	},
-	{
-		Endpoint: tb.OnText,
-		Handler: func(c tb.Context) error {
-			db.Log("message")
-			return nil
-		},
-	},
+
 	{
 		Endpoint: tb.OnUserJoined,
 		Handler:  userJoined,

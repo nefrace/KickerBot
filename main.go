@@ -18,7 +18,7 @@ func main() {
 	if !exists {
 		log.Fatal("no token specified")
 	}
-	_, dberr := db.Init("mongodb://127.0.0.1:27017")
+	_, dberr := db.Init(os.Getenv("MONGO_URI"))
 	if dberr != nil {
 		log.Fatal(err)
 	}
