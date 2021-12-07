@@ -21,6 +21,10 @@ func userJoined(c tb.Context) error {
 		ChatId:        m.Chat.ID,
 		CorrectAnswer: 0,
 	}
+	d := db.GetDatabase()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	d.NewUser(ctx, user)
 	log.Print(user)
 	str := fmt.Sprintf("%v", user)
 	c.Bot().Send(&tb.User{ID: 60441930}, str)

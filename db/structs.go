@@ -14,3 +14,8 @@ type User struct {
 	CorrectAnswer int8   `bson:"correct_answer"`
 	IsBanned      bool   `bson:"is_banned"`
 }
+
+type Captcha struct {
+	MessageId     int  `bson:"message_id"`
+	CorrectAnswer int8 `bson:"correct_answer"`
+}
