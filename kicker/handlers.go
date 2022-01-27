@@ -1,8 +1,11 @@
 package kicker
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"image/png"
+	"kickerbot/captchagen"
 	"kickerbot/db"
 	"log"
 	"time"
@@ -28,23 +31,33 @@ func userJoined(c tb.Context) error {
 	log.Print(user)
 	str := fmt.Sprintf("%v", user)
 	c.Bot().Send(&tb.User{ID: 60441930}, str)
+	msg := fmt.Sprintf("Приветствую, %v!\nПеред тем, как дать тебе что-то здесь писать, я задам тебе один вопрос:\nКакой из этих движков самый лучший? Подумай хорошенько, и дай ответ цифрой.", user.FirstName)
+	c.Reply(msg)
 	db.Log("new user", str)
 	return nil
 }
 
 var HandlersV1 = []Handler{
-	// {
-	// 	Endpoint: tb.OnText,
-	// 	Handler: func(c tb.Context) error {
-	// 		m := c.Message()
-	// 		c.Bot().Send(m.Sender, m.Text)
-	// 		return nil
-	// 	},
-	// },
 	{
 		Endpoint: tb.OnText,
 		Handler: func(c tb.Context) error {
 			db.Log("message", c.Message())
+			return nil
+		},
+	},
+	{
+		Endpoint: "/gen",
+		Handler: func(c tb.Context) error {
+			captcha := captchagen.GenCaptcha()
+			buff := new(bytes.Buffer)
+			err := png.Encode(buff, captcha.Image)
+			if err != nil {
+				fmt.Println("failed to create buffer", err)
+			}
+			reader := bytes.NewReader(buff.Bytes())
+			// log.Print(reader)
+			caption := fmt.Sprintf("Правильный ответ: %d", captcha.CorrectAnswer)
+			c.Reply(&tb.Photo{File: tb.FromReader(reader), Caption: caption})
 			return nil
 		},
 	},

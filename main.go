@@ -1,6 +1,7 @@
 package main
 
 import (
+	"kickerbot/captchagen"
 	"kickerbot/db"
 	"kickerbot/kicker"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 func main() {
 	err := godotenv.Load()
+	captchagen.InitImages()
 	if err != nil {
 		log.Print("Error loading .env file")
 	}

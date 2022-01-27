@@ -6,16 +6,12 @@ type Chat struct {
 }
 
 type User struct {
-	Id            int64
-	ChatId        int64  `bson:"chat_id"`
-	Username      string `bson:"username"`
-	FirstName     string `bson:"first_name"`
-	LastName      string `bson:"last_name"`
-	CorrectAnswer int8   `bson:"correct_answer"`
-	IsBanned      bool   `bson:"is_banned"`
-}
-
-type Captcha struct {
-	MessageId     int  `bson:"message_id"`
-	CorrectAnswer int8 `bson:"correct_answer"`
+	Id             int64
+	ChatId         int64  `bson:"chat_id"`
+	Username       string `bson:"username"`
+	FirstName      string `bson:"first_name"`
+	LastName       string `bson:"last_name"`
+	CorrectAnswer  int8   `bson:"correct_answer"`
+	CaptchaMessage int    `bson:"captcha_message"`
+	IsBanned       bool   `bson:"is_banned"`
 }
