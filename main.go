@@ -12,7 +12,7 @@ import (
 
 func main() {
 	err := godotenv.Load()
-	captchagen.InitImages()
+	captchagen.Init()
 	if err != nil {
 		log.Print("Error loading .env file")
 	}

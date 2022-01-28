@@ -25,6 +25,7 @@ type Captcha struct {
 
 var Logos []Logo = []Logo{}
 
+// Создаём пустое изображение с серым градиентом, грузим шрифт из /assets и возвращаем контекст вызвавшей функции
 func initImage() *gg.Context {
 	dc := gg.NewContext(600, 400)
 	if err := dc.LoadFontFace("./assets/font.ttf", 24); err != nil {
@@ -40,6 +41,11 @@ func initImage() *gg.Context {
 	return dc
 }
 
+// Генерация капчи.
+//
+// На пустое изображение наносятся логотипы из списка, предварительно перемешанного.
+// К изображениям также добавляются порядковые номера (начиная с 1 вместо 0),
+// а правильный вариант возвращается вместе с итоговой картинкой
 func GenCaptcha() Captcha {
 	dc := initImage()
 	rand.Seed(time.Now().UnixNano())
@@ -68,8 +74,11 @@ func GenCaptcha() Captcha {
 	return captcha
 }
 
-func InitImages() error {
-	images := []Logo{}
+// Инициализация списка логотипов.
+//
+// Логотипы читаются из папки /assets рядом с исполняемым файлом.
+// Принимается формат .png, логотип, представляющий правильный ответ называется godot.png
+func Init() error {
 	files, err := ioutil.ReadDir("./assets")
 	if err != nil {
 		return err
@@ -77,21 +86,19 @@ func InitImages() error {
 	for _, file := range files {
 
 		name := file.Name()
-		if !strings.HasSuffix(name, ".png") {
+		if !strings.HasSuffix(name, ".png") { // Грузим только .png
 			continue
 		}
-		log.Printf("%s", name)
-		path := fmt.Sprintf("./assets/%s", name)
-		im, err := gg.LoadPNG(path)
+		log.Printf("%s", name)                   // Для отладки выводим имена файлов с логотипами
+		path := fmt.Sprintf("./assets/%s", name) // Составляем путь до файла
+		im, err := gg.LoadPNG(path)              // Грузим png, возвращаем ошибку если что-то идёт не так
 		if err != nil {
 			log.Print(err)
 			return err
 		}
-		is_correct := strings.HasPrefix(name, "godot")
-		logo := Logo{Image: im, IsCorrect: is_correct}
-		images = append(images, logo)
+		is_correct := strings.HasPrefix(name, "godot") // Если грузимый файл -- godot*.png - помечаем его как правильный
+		logo := Logo{Image: im, IsCorrect: is_correct} // Создаём в памяти структуру для капчи
+		Logos = append(Logos, logo)                    // Заносим логотип в общий список
 	}
-	Logos = images
-	log.Printf("%v", Logos)
 	return nil
 }
