@@ -52,24 +52,28 @@ var HandlersV1 = []Handler{
 		Handler: func(c tb.Context) error {
 			sender := c.Sender()
 			message := c.Message()
+			bot := c.Bot()
 			d := db.GetDatabase()
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
-			if user, err := d.GetUser(ctx, db.User{Id: sender.ID, ChatId: message.Chat.ID, IsBanned: false}); err == nil {
+			if user, err := d.GetUser(ctx, db.User{Id: sender.ID, ChatId: message.Chat.ID}); err == nil {
 				text := message.Text
+				solved := false
 				if num, err := strconv.Atoi(text); err == nil {
 					if num == int(user.CorrectAnswer) {
 						_ = d.RemoveUser(ctx, user)
-						c.Reply("Капча пройдена!")
-						c.Bot().Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
-					} else {
-						c.Reply("Ещё разочек")
+						solved = true
+						bot.Delete(message)
+						bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
 					}
 				} else {
 					log.Print(err)
 				}
-			} else {
-				c.Bot().Ban(message.Chat, &tb.ChatMember{User: sender})
+				if !solved {
+					bot.Delete(message)
+					bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
+					bot.Ban(message.Chat, &tb.ChatMember{User: sender})
+				}
 			}
 			return nil
 		},
