@@ -14,4 +14,5 @@ type User struct {
 	CorrectAnswer  int8   `bson:"correct_answer"`
 	CaptchaMessage int    `bson:"captcha_message"`
 	IsBanned       bool   `bson:"is_banned"`
+	DateJoined     int64  `bson:"date_joined"`
 }

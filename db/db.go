@@ -22,6 +22,9 @@ type DB struct {
 	Client      *mongo.Client
 }
 
+type EmptyStruct struct {
+}
+
 var database DB = DB{}
 
 func Init(URI string) (DB, error) {
@@ -69,62 +72,4 @@ func (d *DB) Stop() {
 	if err := d.Client.Disconnect(d.Ctx); err != nil {
 		panic(err)
 	}
-}
-
-func (d *DB) NewEntry(ctx context.Context, collectionName string, entry interface{}) error {
-	collection := d.Database.Collection(collectionName)
-	res, err := collection.InsertOne(ctx, entry)
-	if err != nil {
-		return err
-	}
-	log.Printf("New entry: %v\nDB ID: %v\n", entry, res.InsertedID)
-	return nil
-}
-
-func (d *DB) EntryExists(ctx context.Context, collectionName string, filter interface{}) bool {
-	collection := d.Database.Collection(collectionName)
-	var result bson.D
-	err := collection.FindOne(ctx, filter).Decode(&result)
-	if err != nil {
-		log.Printf("EntryExists error: %v", err)
-	}
-	return err != mongo.ErrNoDocuments
-}
-
-func (d *DB) ChatExists(ctx context.Context, chat Chat) bool {
-	filter := bson.D{primitive.E{Key: "id", Value: chat.Id}}
-	return d.EntryExists(ctx, "chats", filter)
-}
-
-func (d *DB) UserExists(ctx context.Context, user User) bool {
-	filter := bson.D{
-		primitive.E{Key: "id", Value: user.Id},
-		primitive.E{Key: "chat_id", Value: user.ChatId},
-	}
-	return d.EntryExists(ctx, "users", filter)
-}
-
-func (d *DB) NewChat(ctx context.Context, chat Chat) error {
-	if d.ChatExists(ctx, chat) {
-		return errors.New("chat entry already exists")
-	}
-	err := d.NewEntry(ctx, "chats", chat)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	log.Printf("New chat added: %s (%d)\n", chat.Title, chat.Id)
-	return nil
-}
-
-func (d *DB) NewUser(ctx context.Context, user User) error {
-	if d.UserExists(ctx, user) {
-		return errors.New("user entry already exists")
-	}
-	err := d.NewEntry(ctx, "users", user)
-	if err != nil {
-		return err
-	}
-	log.Printf("New user: %v\n", user)
-	return nil
 }

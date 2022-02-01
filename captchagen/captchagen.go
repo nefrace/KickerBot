@@ -1,9 +1,11 @@
 package captchagen
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/color"
+	"image/png"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -24,6 +26,7 @@ type Captcha struct {
 }
 
 var Logos []Logo = []Logo{}
+var XPositions []int = []int{}
 
 // Создаём пустое изображение с серым градиентом, грузим шрифт из /assets и возвращаем контекст вызвавшей функции
 func initImage() *gg.Context {
@@ -49,11 +52,11 @@ func initImage() *gg.Context {
 func GenCaptcha() Captcha {
 	dc := initImage()
 	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(Logos), func(i, j int) { Logos[i], Logos[j] = Logos[j], Logos[i] })
+	rand.Shuffle(len(Logos), func(i, j int) { Logos[i], Logos[j] = Logos[j], Logos[i] })                          // Перемешиваем логотипы
+	rand.Shuffle(len(XPositions), func(i, j int) { XPositions[i], XPositions[j] = XPositions[j], XPositions[i] }) // И позиции
 	correct_answer := 0
-	count := len(Logos)
 	for i, logo := range Logos {
-		x := i*600/count + 50
+		x := XPositions[i]
 		y := rand.Intn(400 - logo.Image.Bounds().Dy())
 		dc.DrawImage(logo.Image, x, y)
 		if logo.IsCorrect {
@@ -72,6 +75,16 @@ func GenCaptcha() Captcha {
 	}
 
 	return captcha
+}
+
+func (captcha *Captcha) ToReader() *bytes.Reader {
+	buff := new(bytes.Buffer)
+	err := png.Encode(buff, captcha.Image)
+	if err != nil {
+		fmt.Println("failed to create buffer", err)
+	}
+	reader := bytes.NewReader(buff.Bytes())
+	return reader
 }
 
 // Инициализация списка логотипов.
@@ -99,6 +112,10 @@ func Init() error {
 		is_correct := strings.HasPrefix(name, "godot") // Если грузимый файл -- godot*.png - помечаем его как правильный
 		logo := Logo{Image: im, IsCorrect: is_correct} // Создаём в памяти структуру для капчи
 		Logos = append(Logos, logo)                    // Заносим логотип в общий список
+	}
+
+	for i := range Logos {
+		XPositions = append(XPositions, 50+i*600/len(Logos)) // Горизонтальное расположение не рандомно: чтобы логотипы не перемешались.
 	}
 	return nil
 }
