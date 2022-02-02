@@ -1,0 +1,8 @@
+.git
+.gitignore
+README.md
+bin
+*.env
+.vscode
+mongodata
+mongoconfig
