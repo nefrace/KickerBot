@@ -119,7 +119,7 @@ func Init() error {
 	}
 
 	for i := range Logos {
-		XPositions = append(XPositions, 50+i*ImageWidth/len(Logos)) // Горизонтальное расположение не рандомно: чтобы логотипы не перемешались.
+		XPositions = append(XPositions, 50+i*(ImageWidth-50)/len(Logos)) // Горизонтальное расположение не рандомно: чтобы логотипы не перемешались.
 	}
 	return nil
 }
