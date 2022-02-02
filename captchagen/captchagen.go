@@ -15,6 +15,9 @@ import (
 	"github.com/fogleman/gg"
 )
 
+var ImageWidth int = 600
+var ImageHeight int = 400
+
 type Logo struct {
 	Image     image.Image
 	IsCorrect bool
@@ -30,16 +33,17 @@ var XPositions []int = []int{}
 
 // Создаём пустое изображение с серым градиентом, грузим шрифт из /assets и возвращаем контекст вызвавшей функции
 func initImage() *gg.Context {
-	dc := gg.NewContext(600, 400)
+	dc := gg.NewContext(ImageWidth, ImageHeight)
 	if err := dc.LoadFontFace("./assets/font.ttf", 24); err != nil {
 		panic(err)
 	}
-	grad := gg.NewLinearGradient(0, 0, 600, 400)
+	fIWidth, fIHeight := float64(ImageWidth), float64(ImageHeight)
+	grad := gg.NewLinearGradient(0, 0, fIWidth, fIHeight)
 	grad.AddColorStop(0, color.RGBA{71, 100, 106, 255})
 	grad.AddColorStop(1, color.RGBA{44, 43, 51, 255})
 
 	dc.SetFillStyle(grad)
-	dc.DrawRectangle(0, 0, 600, 400)
+	dc.DrawRectangle(0, 0, fIWidth, fIHeight)
 	dc.Fill()
 	return dc
 }
@@ -57,7 +61,7 @@ func GenCaptcha() Captcha {
 	correct_answer := 0
 	for i, logo := range Logos {
 		x := XPositions[i]
-		y := rand.Intn(400 - logo.Image.Bounds().Dy())
+		y := rand.Intn(ImageHeight - logo.Image.Bounds().Dy() - 30)
 		dc.DrawImage(logo.Image, x, y)
 		if logo.IsCorrect {
 			correct_answer = i + 1
@@ -115,7 +119,7 @@ func Init() error {
 	}
 
 	for i := range Logos {
-		XPositions = append(XPositions, 50+i*600/len(Logos)) // Горизонтальное расположение не рандомно: чтобы логотипы не перемешались.
+		XPositions = append(XPositions, 50+i*ImageWidth/len(Logos)) // Горизонтальное расположение не рандомно: чтобы логотипы не перемешались.
 	}
 	return nil
 }

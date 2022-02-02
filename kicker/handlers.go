@@ -73,6 +73,7 @@ var HandlersV1 = []Handler{
 					bot.Delete(message)
 					bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
 					bot.Ban(message.Chat, &tb.ChatMember{User: sender})
+					_ = d.RemoveUser(ctx, user)
 				}
 			}
 			return nil
