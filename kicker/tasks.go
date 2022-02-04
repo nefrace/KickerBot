@@ -13,6 +13,7 @@ import (
 
 func TaskKickOldUsers(b tb.Bot) {
 	d := db.GetDatabase()
+	db.Log("STARTING KICKING TASK", db.EmptyStruct{})
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	now := time.Now().Unix()
@@ -29,6 +30,6 @@ func TaskKickOldUsers(b tb.Bot) {
 		tbUser := tb.User{ID: user.Id}
 		member := tb.ChatMember{User: &tbUser}
 		b.Ban(&chat, &member)
-		time.Sleep(250 * time.Millisecond)
+		d.RemoveUser(ctx, user)
 	}
 }

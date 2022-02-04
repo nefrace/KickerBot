@@ -30,9 +30,8 @@ func main() {
 	Bot := kicker.Kicker{Token: token}
 	Bot.Init()
 	Bot.AddHandlers(kicker.HandlersV1)
-	Bot.Bot.Start()
-
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.Every(1).Minutes().Do(func() { kicker.TaskKickOldUsers(*Bot.Bot) })
 	scheduler.StartAsync()
+	Bot.Bot.Start()
 }

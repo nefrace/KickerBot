@@ -94,16 +94,16 @@ var HandlersV1 = []Handler{
 			return nil
 		},
 	},
-	{
-		Endpoint: "/gen",
-		Handler: func(c tb.Context) error {
-			captcha := captchagen.GenCaptcha()
-			reader := captcha.ToReader()
-			caption := fmt.Sprintf("Правильный ответ: %d", captcha.CorrectAnswer)
-			c.Reply(&tb.Photo{File: tb.FromReader(reader), Caption: caption})
-			return nil
-		},
-	},
+	// {
+	// 	Endpoint: "/gen",
+	// 	Handler: func(c tb.Context) error {
+	// 		captcha := captchagen.GenCaptcha()
+	// 		reader := captcha.ToReader()
+	// 		caption := fmt.Sprintf("Правильный ответ: %d", captcha.CorrectAnswer)
+	// 		c.Reply(&tb.Photo{File: tb.FromReader(reader), Caption: caption})
+	// 		return nil
+	// 	},
+	// },
 	{
 		Endpoint: tb.OnAddedToGroup,
 		Handler: func(c tb.Context) error {
