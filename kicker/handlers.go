@@ -46,6 +46,21 @@ func userJoined(c tb.Context) error {
 	return nil
 }
 
+func userLeft(c tb.Context) error {
+	bot := c.Bot()
+	message := c.Message()
+	sender := c.Sender()
+	d := db.GetDatabase()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if user, err := d.GetUser(ctx, db.User{Id: sender.ID, ChatId: message.Chat.ID}); err == nil {
+		d.RemoveUser(ctx, user)
+		bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
+		db.Log("user left", user)
+	}
+	return nil
+}
+
 var HandlersV1 = []Handler{
 	{
 		Endpoint: tb.OnText,
@@ -112,5 +127,9 @@ var HandlersV1 = []Handler{
 	{
 		Endpoint: tb.OnUserJoined,
 		Handler:  userJoined,
+	},
+	{
+		Endpoint: tb.OnUserLeft,
+		Handler:  userLeft,
 	},
 }
