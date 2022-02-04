@@ -11,7 +11,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v3"
 )
 
-func KickOldUsers(b tb.Bot) {
+func TaskKickOldUsers(b tb.Bot) {
 	d := db.GetDatabase()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
