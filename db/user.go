@@ -43,6 +43,18 @@ func (d *DB) GetUser(ctx context.Context, user User) (User, error) {
 	return result, nil
 }
 
+func (d *DB) GetUsers(ctx context.Context, filter bson.D) ([]User, error) {
+	cursor, err := d.Database.Collection("users").Find(ctx, filter)
+	if err != nil {
+		return []User{}, err
+	}
+	var results []User
+	if err = cursor.All(ctx, &results); err != nil {
+		return []User{}, err
+	}
+	return results, nil
+}
+
 func (d *DB) RemoveUser(ctx context.Context, user User) error {
 	filter := makeIDFilter(user)
 	_, err := d.Database.Collection("users").DeleteOne(ctx, filter)
