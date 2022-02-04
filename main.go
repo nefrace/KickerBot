@@ -31,7 +31,7 @@ func main() {
 	Bot.Init()
 	Bot.AddHandlers(kicker.HandlersV1)
 	scheduler := gocron.NewScheduler(time.UTC)
-	scheduler.Every(1).Minutes().Do(func() { kicker.TaskKickOldUsers(*Bot.Bot) })
+	scheduler.Every(30).Seconds().Do(func() { kicker.TaskKickOldUsers(*Bot.Bot) })
 	scheduler.StartAsync()
 	Bot.Bot.Start()
 }

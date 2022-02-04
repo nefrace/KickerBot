@@ -13,13 +13,13 @@ import (
 
 func TaskKickOldUsers(b tb.Bot) {
 	d := db.GetDatabase()
-	db.Log("STARTING KICKING TASK", db.EmptyStruct{})
+	log.Print("STARTING KICKING TASK")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	now := time.Now().Unix()
 	old := now - 60
 	filter := bson.D{
-		primitive.E{Key: "date_joined", Value: bson.D{{"$lt", old}}},
+		primitive.E{Key: "date_joined", Value: bson.D{bson.E{Key: "$lt", Value: old}}},
 	}
 	users, err := d.GetUsers(ctx, filter)
 	if err != nil {
@@ -29,7 +29,9 @@ func TaskKickOldUsers(b tb.Bot) {
 		chat := tb.Chat{ID: user.ChatId}
 		tbUser := tb.User{ID: user.Id}
 		member := tb.ChatMember{User: &tbUser}
+		message := tb.Message{Chat: &chat, ID: user.CaptchaMessage}
 		b.Ban(&chat, &member)
+		b.Delete(&message)
 		d.RemoveUser(ctx, user)
 	}
 }

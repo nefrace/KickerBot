@@ -32,15 +32,13 @@ func userJoined(c tb.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	log.Print(user)
-	str := fmt.Sprintf("%v", user)
-	msg := fmt.Sprintf("Приветствую, %v!\nПеред тем, как дать тебе что-то здесь писать, я задам тебе один вопрос:\nКакой из этих движков самый лучший? Подумай хорошенько, и дай ответ цифрой.", user.FirstName)
+	msg := fmt.Sprintf("Приветствую тебя, %v!\nДля подтверждения, что ты человек, выбери логотип движка, которому посвящен данный чат, и отправь его номер сюда.\nЯ дам тебе минуту на это.", user.FirstName)
 	photo := tb.Photo{File: tb.FromReader(reader), Caption: msg}
 	result, err := bot.Send(tb.ChatID(message.Chat.ID), &photo, &tb.SendOptions{ReplyTo: message})
 	if err != nil {
 		return err
 	}
 	user.CaptchaMessage = result.ID
-	db.Log("new user", str)
 
 	d.NewUser(ctx, user)
 	return nil
@@ -56,7 +54,6 @@ func userLeft(c tb.Context) error {
 	if user, err := d.GetUser(ctx, db.User{Id: sender.ID, ChatId: message.Chat.ID}); err == nil {
 		d.RemoveUser(ctx, user)
 		bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
-		db.Log("user left", user)
 	}
 	return nil
 }
@@ -119,7 +116,6 @@ var HandlersV1 = []Handler{
 			if err != nil {
 				log.Print(err)
 			}
-			db.Log("new chat", chat)
 			return nil
 		},
 	},
