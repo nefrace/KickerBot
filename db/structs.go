@@ -15,4 +15,5 @@ type User struct {
 	CaptchaMessage int    `bson:"captcha_message"`
 	IsBanned       bool   `bson:"is_banned"`
 	DateJoined     int64  `bson:"date_joined"`
+	JoinedMessage  int    `bson:"joined_message"`
 }

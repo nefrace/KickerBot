@@ -17,7 +17,7 @@ func TaskKickOldUsers(b tb.Bot) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	now := time.Now().Unix()
-	old := now - 60
+	old := now - 120
 	filter := bson.D{
 		primitive.E{Key: "date_joined", Value: bson.D{bson.E{Key: "$lt", Value: old}}},
 	}
@@ -30,8 +30,10 @@ func TaskKickOldUsers(b tb.Bot) {
 		tbUser := tb.User{ID: user.Id}
 		member := tb.ChatMember{User: &tbUser}
 		message := tb.Message{Chat: &chat, ID: user.CaptchaMessage}
+		joinMessage := tb.Message{Chat: &chat, ID: user.JoinedMessage}
 		b.Ban(&chat, &member)
 		b.Delete(&message)
+		b.Delete(&joinMessage)
 		d.RemoveUser(ctx, user)
 	}
 }
