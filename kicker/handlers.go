@@ -60,67 +60,62 @@ func userLeft(c tb.Context) error {
 	return nil
 }
 
+func checkCaptcha(c tb.Context) error {
+	sender := c.Sender()
+	message := c.Message()
+	bot := c.Bot()
+	d := db.GetDatabase()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if user, err := d.GetUser(ctx, db.User{Id: sender.ID, ChatId: message.Chat.ID}); err == nil {
+		text_runes := []rune(message.Text)
+		guess := string(text_runes[0])
+		solved := false
+		if num, err := strconv.Atoi(guess); err == nil {
+			if num == int(user.CorrectAnswer) {
+				_ = d.RemoveUser(ctx, user)
+				solved = true
+				bot.Delete(message)
+				bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
+			}
+		} else {
+			log.Print(err)
+		}
+		if !solved {
+			bot.Delete(message)
+			bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
+			bot.Delete(&tb.Message{Chat: message.Chat, ID: user.JoinedMessage})
+			bot.Ban(message.Chat, &tb.ChatMember{User: sender})
+			_ = d.RemoveUser(ctx, user)
+		}
+	}
+	return nil
+}
+
+func botAdded(c tb.Context) error {
+	m := c.Message()
+	chat := db.Chat{
+		Id:    m.Chat.ID,
+		Title: m.Chat.Title,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	d := db.GetDatabase()
+	err := d.NewChat(ctx, chat)
+	if err != nil {
+		log.Print(err)
+	}
+	return nil
+}
+
 var HandlersV1 = []Handler{
 	{
 		Endpoint: tb.OnText,
-		Handler: func(c tb.Context) error {
-			sender := c.Sender()
-			message := c.Message()
-			bot := c.Bot()
-			d := db.GetDatabase()
-			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-			defer cancel()
-			if user, err := d.GetUser(ctx, db.User{Id: sender.ID, ChatId: message.Chat.ID}); err == nil {
-				text := message.Text
-				solved := false
-				if num, err := strconv.Atoi(text); err == nil {
-					if num == int(user.CorrectAnswer) {
-						_ = d.RemoveUser(ctx, user)
-						solved = true
-						bot.Delete(message)
-						bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
-					}
-				} else {
-					log.Print(err)
-				}
-				if !solved {
-					bot.Delete(message)
-					bot.Delete(&tb.Message{Chat: message.Chat, ID: user.CaptchaMessage})
-					bot.Delete(&tb.Message{Chat: message.Chat, ID: user.JoinedMessage})
-					bot.Ban(message.Chat, &tb.ChatMember{User: sender})
-					_ = d.RemoveUser(ctx, user)
-				}
-			}
-			return nil
-		},
+		Handler:  checkCaptcha,
 	},
-	// {
-	// 	Endpoint: "/gen",
-	// 	Handler: func(c tb.Context) error {
-	// 		captcha := captchagen.GenCaptcha()
-	// 		reader := captcha.ToReader()
-	// 		caption := fmt.Sprintf("Правильный ответ: %d", captcha.CorrectAnswer)
-	// 		c.Reply(&tb.Photo{File: tb.FromReader(reader), Caption: caption})
-	// 		return nil
-	// 	},
-	// },
 	{
 		Endpoint: tb.OnAddedToGroup,
-		Handler: func(c tb.Context) error {
-			m := c.Message()
-			chat := db.Chat{
-				Id:    m.Chat.ID,
-				Title: m.Chat.Title,
-			}
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-			d := db.GetDatabase()
-			err := d.NewChat(ctx, chat)
-			if err != nil {
-				log.Print(err)
-			}
-			return nil
-		},
+		Handler:  botAdded,
 	},
 
 	{
