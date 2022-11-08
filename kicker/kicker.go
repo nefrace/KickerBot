@@ -18,26 +18,27 @@ type bot struct {
 }
 
 func (b *bot) Update(update *tb.Update) {
-	if len(update.Message.NewChatMembers) != 0 {
-		for _, user := range update.Message.NewChatMembers {
-			if user.ID == b.Me.ID {
-				botAdded(b, update)
+	if update.Message != nil {
+		if len(update.Message.NewChatMembers) != 0 {
+			for _, user := range update.Message.NewChatMembers {
+				if user.ID == b.Me.ID {
+					botAdded(b, update)
+				}
 			}
-		}
-		userJoined(b, update)
-		return
-	}
-	if update.Message.LeftChatMember != nil {
-		userLeft(b, update)
-		return
-	}
-	if update.Message.Text != "" {
-		if update.Message.Text == "/settopic" {
-			setTopic(b, update)
+			userJoined(b, update)
 			return
 		}
-		checkCaptcha(b, update)
-
+		if update.Message.LeftChatMember != nil {
+			userLeft(b, update)
+			return
+		}
+		if update.Message.Text != "" {
+			if update.Message.Text == "/settopic" {
+				setTopic(b, update)
+				return
+			}
+			checkCaptcha(b, update)
+		}
 	}
 }
 

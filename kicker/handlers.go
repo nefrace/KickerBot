@@ -71,7 +71,7 @@ func userLeft(b *bot, update *tb.Update) error {
 
 func checkCaptcha(b *bot, update *tb.Update) error {
 	message := update.Message
-	sender := message.ForwardFrom
+	sender := message.From
 	d := db.GetDatabase()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
