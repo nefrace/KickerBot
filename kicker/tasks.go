@@ -6,12 +6,17 @@ import (
 	"log"
 	"time"
 
+	tb "github.com/NicoNex/echotron/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	tb "gopkg.in/tucnak/telebot.v3"
 )
 
-func TaskKickOldUsers(b tb.Bot) {
+type TaskBot struct {
+	Token string
+	tb.API
+}
+
+func TaskKickOldUsers(b *tb.API) {
 	d := db.GetDatabase()
 	log.Print("STARTING KICKING TASK")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -26,14 +31,9 @@ func TaskKickOldUsers(b tb.Bot) {
 		log.Printf("Error in deleting task: %v", err)
 	}
 	for _, user := range users {
-		chat := tb.Chat{ID: user.ChatId}
-		tbUser := tb.User{ID: user.Id}
-		member := tb.ChatMember{User: &tbUser}
-		message := tb.Message{Chat: &chat, ID: user.CaptchaMessage}
-		joinMessage := tb.Message{Chat: &chat, ID: user.JoinedMessage}
-		b.Ban(&chat, &member)
-		b.Delete(&message)
-		b.Delete(&joinMessage)
+		b.BanChatMember(user.ChatId, user.Id, &tb.BanOptions{RevokeMessages: true})
+		b.DeleteMessage(user.ChatId, user.CaptchaMessage)
+		b.DeleteMessage(user.ChatId, user.JoinedMessage)
 		d.RemoveUser(ctx, user)
 	}
 }

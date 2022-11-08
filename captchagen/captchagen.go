@@ -91,6 +91,16 @@ func (captcha *Captcha) ToReader() *bytes.Reader {
 	return reader
 }
 
+func (captcha *Captcha) ToBytes() (*[]byte, error) {
+	buff := new(bytes.Buffer)
+	err := png.Encode(buff, captcha.Image)
+	if err != nil {
+		return nil, err
+	}
+	b := buff.Bytes()
+	return &b, nil
+}
+
 // Инициализация списка логотипов.
 //
 // Логотипы читаются из папки /assets рядом с исполняемым файлом.
