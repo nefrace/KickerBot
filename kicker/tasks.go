@@ -31,7 +31,12 @@ func TaskKickOldUsers(b *tb.API) {
 		log.Printf("Error in deleting task: %v", err)
 	}
 	for _, user := range users {
-		b.BanChatMember(user.ChatId, user.Id, &tb.BanOptions{RevokeMessages: true})
+
+		_, err := b.BanChatMember(user.ChatId, user.Id, &tb.BanOptions{RevokeMessages: true})
+		if err != nil {
+			log.Println("User was not banned: ", err)
+			continue
+		}
 		b.DeleteMessage(user.ChatId, user.CaptchaMessage)
 		b.DeleteMessage(user.ChatId, user.JoinedMessage)
 		d.RemoveUser(ctx, user)
