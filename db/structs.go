@@ -1,8 +1,9 @@
 package db
 
 type Chat struct {
-	Id    int64
-	Title string
+	Id      int64
+	Title   string
+	TopicId int64 `bson:"topic_id"`
 }
 
 type User struct {

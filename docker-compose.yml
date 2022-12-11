@@ -15,7 +15,7 @@ services:
     env_file:
       - mongo.env
     ports:
-      - 127.0.0.1:28001:27017
+      - 127.0.0.1:28002:27017
     volumes:
       - mongodata:/data/db
       - mongoconfig:/data/configdb
@@ -24,7 +24,7 @@ services:
     image: mongo-express
     restart: always
     ports:
-      - 127.0.0.1:8089:8081
+      - 127.0.0.1:8088:8081
     env_file:
       - mongo.env
 

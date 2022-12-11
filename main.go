@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/NicoNex/echotron/v3"
 	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
 )
@@ -29,9 +30,9 @@ func main() {
 
 	Bot := kicker.Kicker{Token: token}
 	Bot.Init()
-	Bot.AddHandlers(kicker.HandlersV1)
 	scheduler := gocron.NewScheduler(time.UTC)
-	scheduler.Every(30).Seconds().Do(func() { kicker.TaskKickOldUsers(*Bot.Bot) })
+	tasker := echotron.NewAPI(token)
+	scheduler.Every(30).Seconds().Do(func() { kicker.TaskKickOldUsers(&tasker) })
 	scheduler.StartAsync()
-	Bot.Bot.Start()
+	Bot.Start()
 }
