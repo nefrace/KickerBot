@@ -97,9 +97,6 @@ func checkCaptcha(b *bot, update *tb.Update) error {
 				b.DeleteMessage(message.Chat.ID, user.CaptchaMessage)
 
 			}
-		} else {
-			log.Println(err)
-			return err
 		}
 		if !solved {
 			b.DeleteMessage(message.Chat.ID, message.ID)
