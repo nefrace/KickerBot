@@ -15,6 +15,10 @@ import (
 
 func userJoined(b *bot, update *tb.Update) error {
 	captcha := captchagen.GenCaptcha()
+	_, err := b.DeleteMessage(update.Message.Chat.ID, update.Message.ID)
+	if err != nil {
+		log.Printf("Can't delete message: %v", err)
+	}
 	bytes, err := captcha.ToBytes()
 	if err != nil {
 		fmt.Printf("Error creating captcha bytes: %v", bytes)
@@ -95,7 +99,22 @@ func checkCaptcha(b *bot, update *tb.Update) error {
 				solved = true
 				b.DeleteMessage(message.Chat.ID, message.ID)
 				b.DeleteMessage(message.Chat.ID, user.CaptchaMessage)
-
+				msg := fmt.Sprintf("Приветствую тебя, *[%s](tg://user?id=%d)* успешно прошёл капчу\\!", EscapeText(tb.MarkdownV2, user.FirstName), user.Id)
+				options := tb.MessageOptions{
+					ParseMode: tb.MarkdownV2,
+				}
+				if message.Chat.IsForum {
+					options.MessageThreadID = int(b.CaptchaTopic)
+				}
+				res, err := b.SendMessage(msg, message.Chat.ID, &options)
+				if err != nil {
+					log.Printf("Can't send welcome message: %s", err)
+				}
+				time.Sleep(time.Second * 10)
+				_, err = b.DeleteMessage(message.Chat.ID, res.Result.ID)
+				if err != nil {
+					log.Printf("Can't delete welcome message: %s", err)
+				}
 			}
 		}
 		if !solved {
